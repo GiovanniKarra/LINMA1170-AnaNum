@@ -1,6 +1,8 @@
 import numpy as np
 import numba as nb
 
+from bsplines import B, generate_heart_points, draw_curve
+
 
 # algo tourne en O(mpn)
 @nb.jit(nopython=True, parallel=True)
@@ -46,7 +48,7 @@ def qr(A):
 
     return Q, R
 
-@nb.jit(nopython=True, parallel=True)
+#@nb.jit(nopython=True, parallel=True)
 def lstsq(A, B):
     m, n = np.shape(A)
 
@@ -54,7 +56,7 @@ def lstsq(A, B):
 
     B_ = Q.T @ B
 
-    X = np.zeros(n, dtype="float64")
+    X = np.zeros(np.shape(B_), dtype="float64")
 
     for i in range(n-1, -1, -1):
         sum = 0
@@ -65,18 +67,34 @@ def lstsq(A, B):
     return X
 
 
-if __name__ == "__main__":
-    A = np.array([[1, 1, 1], [2, 3, 4], [8, 9, 16]], dtype="float64")
+def give_control_points(P, n, p=3):
+    m = np.shape(P)[0]
+    t = np.zeros(m)
+    P_diff = [np.sqrt((P[i]-P[i-1]) @ (P[i]-P[i-1])) for i in range(1, m)]
+    D = np.sum(P_diff)
+    for i in range(1, m):
+        t[i] = t[i-1] + P_diff[i-1]/D
+
+    T = np.zeros(n+p+1)
+    for i in range(4):
+        T[i] = 0
+        T[-i-1] = 1
+    for i in range(1, n-3):
+        d = m/(n-3)
+        j = int(np.floor(i*d))
+        alpha = i*d - j
+        T[i+3] = (1-alpha)*t[j-1] + alpha*t[j]
+
+    A = np.array([[B(i, p, t[j], T) for i in range(n)] for j in range(m)])
     
-    # Q, R = qr(A)
+    X = lstsq(A, P)
 
-    # print(Q)
-    # print(R)
+    return X, T
 
-    # print(Q @ R)
-    # print(Q[:, 0] @ Q[:, 1])
 
-    B =  np.array([1, 2, 3], dtype="float64")
-    X = lstsq(A, B)
+if __name__ == "__main__":
+    p = np.transpose(generate_heart_points())
 
-    print(X)
+    P, T = give_control_points(p, 15)
+
+    draw_curve(P, T, P_real=p)
