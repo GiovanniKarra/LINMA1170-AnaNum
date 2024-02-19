@@ -31,34 +31,52 @@ def mult_vec(a, b):
     return sum
 
 
-@nb.jit(nopython=True, parallel=True)
+@nb.jit(nopython=True)
 def qr(A):
     m, n = np.shape(A)
-    Q = np.zeros((m, n))
-    R = np.zeros((n, n))
+    Q = np.copy(A)
+    R = np.zeros((n, n), dtype="float64")
 
-    for j in nb.prange(n):
-        v = A[:, j]
-        for i in nb.prange(j):
-            R[i, j] = mult_vec(Q[:, i], A[:, j])
-            v -= R[i, j]*Q[:, i]
-        R[j, j] = mult_vec(v, v)
-        Q[:, j] = v/R[j, j]
+    for i in range(n):
+        R[i, i] = np.sqrt(Q[:, i] @ Q[:, i])
+        Q[:, i] /= R[i, i]
+        for j in range(i+1, n):
+            R[i, j] = Q[:, i] @ Q[:, j]
+            Q[:, j] -= R[i, j] * Q[:, i]
 
     return Q, R
 
-
+@nb.jit(nopython=True, parallel=True)
 def lstsq(A, B):
-    pass
+    m, n = np.shape(A)
+
+    Q, R = qr(A)
+
+    B_ = Q.T @ B
+
+    X = np.zeros(n, dtype="float64")
+
+    for i in range(n-1, -1, -1):
+        sum = 0
+        for j in nb.prange(i+1, n):
+            sum += R[i, j]*X[j]
+        X[i] = (B_[i]-sum)/R[i, i]
+
+    return X
 
 
 if __name__ == "__main__":
-    A = np.array([[1, 1], [2, 3], [8, 9]], dtype="float64")
+    A = np.array([[1, 1, 1], [2, 3, 4], [8, 9, 16]], dtype="float64")
     
-    Q, R = qr(A)
+    # Q, R = qr(A)
 
-    print(Q)
-    print(R)
+    # print(Q)
+    # print(R)
 
-    print(mult(Q, R))
-    print(mult_vec(Q[:, 0], Q[:, 1]))
+    # print(Q @ R)
+    # print(Q[:, 0] @ Q[:, 1])
+
+    B =  np.array([1, 2, 3], dtype="float64")
+    X = lstsq(A, B)
+
+    print(X)
