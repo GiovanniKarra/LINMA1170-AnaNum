@@ -1,7 +1,10 @@
 import numpy as np
 import numba as nb
 
-from bsplines import B, generate_heart_points, draw_curve
+try:
+    from bsplines import B, generate_heart_points, draw_curve
+except:
+    pass
 
 
 # algo tourne en O(mpn)
@@ -48,7 +51,7 @@ def qr(A):
 
     return Q, R
 
-#@nb.jit(nopython=True, parallel=True)
+#@nb.jit(nopython=True)
 def lstsq(A, B):
     m, n = np.shape(A)
 
@@ -60,7 +63,7 @@ def lstsq(A, B):
 
     for i in range(n-1, -1, -1):
         sum = 0
-        for j in nb.prange(i+1, n):
+        for j in range(i+1, n):
             sum += R[i, j]*X[j]
         X[i] = (B_[i]-sum)/R[i, i]
 
@@ -90,11 +93,3 @@ def give_control_points(P, n, p=3):
     X = lstsq(A, P)
 
     return X, T
-
-
-if __name__ == "__main__":
-    p = np.transpose(generate_heart_points())
-
-    P, T = give_control_points(p, 15)
-
-    draw_curve(P, T, P_real=p)

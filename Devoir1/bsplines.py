@@ -27,6 +27,13 @@ def draw_curve(P, T, deg=3, P_real=None):
     n = len(P)
 
     plt.figure()
+
+    plt.xlabel("x"); plt.ylabel("y")
+
+    plt.title(f"n = {len(P)}" + f", m = {len(P_real)}" if P_real is not None else "")
+
+    plt.grid(True)
+
     if P_real is not None:
         plt.scatter(P_real[:, 0], P_real[:, 1], c="b")
     plt.scatter(P[:, 0], P[:, 1], c="r")
@@ -37,19 +44,3 @@ def draw_curve(P, T, deg=3, P_real=None):
     plt.show()
 
 
-def generate_heart_points():
-    t = np.linspace(0, 2 * np.pi, 50)
-    x = 16 * np.sin(t) ** 3
-    y = 13 * np.cos(t) - 5 * np.cos(2 * t) - 2 * np.cos(3 * t) - np.cos(4 * t)
-    return x, y
-
-
-# plot les points générés par la fonction generate_heart_points
-def plot_heart():
-    x, y = generate_heart_points()
-    plt.plot(x, y, 'ro')
-
-
-
-if __name__ == "__main__":
-    pass
