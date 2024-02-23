@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from time import time
+from time import perf_counter
 
 from devoir1 import *
 from bsplines import draw_curve
@@ -12,13 +12,13 @@ def generate_heart_points(m):
     return x, y
 
 
-def test_bsplines(generating_func, m, n):
+def test_bsplines(generating_func, m, n, show_real=True):
     x, y = generating_func(m)
 
     P_real = np.array((x, y)).T
     P, T = give_control_points(P_real, n)
 
-    draw_curve(P, T, P_real=P_real)
+    draw_curve(P, T, P_real=(P_real if show_real else None))
 
 
 def test_qr(num=100):
@@ -31,9 +31,9 @@ def test_qr(num=100):
     for i in range(num):
         A = np.random.rand(int(m[i]), int(n[i]))
 
-        t = time()
+        t = perf_counter()
         qr(A)
-        times[i] = time()-t
+        times[i] = perf_counter()-t
 
     plt.figure()
 
@@ -45,16 +45,27 @@ def test_qr(num=100):
     plt.loglog(m, times)
     plt.loglog(m, np.power(m, 3)/300000000, linestyle="dashed")
 
-    plt.grid(True)
+    plt.grid(which="major", linestyle="-")
+    plt.grid(which="minor", linestyle=":")
 
     plt.legend(["QR", "x³/300 000 000"])
 
     plt.show()
 
+def generate_turtle(_):
+    turtle = open("turtle.txt").readlines()
+    turtle = [[float(x) for x in elem.strip("\n").split(",")] for elem in turtle]
+    return np.array(turtle).T
+
 
 if __name__ == "__main__":
-    # test_qr(5)
+    test_qr(100)
 
     test_bsplines(generate_heart_points, 100, 15)
+    test_bsplines(generate_heart_points, 100, 50)
+    test_bsplines(generate_heart_points, 100, 80)
+    test_bsplines(generate_heart_points, 100, 93)
     test_bsplines(generate_heart_points, 20, 15)
     test_bsplines(generate_heart_points, 15, 15)
+
+    test_bsplines(generate_turtle, 684, 300, show_real=False)

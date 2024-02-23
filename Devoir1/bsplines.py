@@ -32,14 +32,16 @@ def draw_curve(P, T, deg=3, P_real=None):
 
     plt.title(f"n = {len(P)}" + f", m = {len(P_real)}" if P_real is not None else "")
 
-    plt.grid(True)
+    plt.grid(which="major", linestyle=":")
 
     if P_real is not None:
-        plt.scatter(P_real[:, 0], P_real[:, 1], c="b")
+        plt.scatter(P_real[:, 0], P_real[:, 1], c="b", s=20)
     plt.scatter(P[:, 0], P[:, 1], c="r")
 
     p = np.array([np.sum([B(i, deg, ti, T)*P[i] for i in range(n)], axis=0) for ti in t])
-    plt.plot(p[:, 0], p[:, 1])
+    plt.plot(p[:, 0], p[:, 1], c="lime")
+
+    plt.legend(([] if P_real is None else ["Original points"]) + ["Control points", "B-spline curve"])
 
     plt.show()
 

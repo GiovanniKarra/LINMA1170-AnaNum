@@ -8,29 +8,30 @@ except:
 
 
 # algo tourne en O(mpn)
-@nb.jit(nopython=True, parallel=True)
+@nb.jit(nopython=True)
 def mult(A, B):
     m, n = np.shape(A)
-    _, p = np.shape(B)
+    #_, p = np.shape(B)
+    p = np.shape(B)[-1]
 
-    C = np.zeros((m, p))
+    C = np.zeros((m, p), dtype="float64")
 
-    for i in nb.prange(m):
-        for j in nb.prange(p):
-            for k in nb.prange(n):
-                C[i][j] += A[i][k]*B[k][j]
+    for i in range(m):
+        for j in range(p):
+            for k in range(n):
+                C[i, j] += A[i, k]*B[k, j]
 
     return C
 
 
-@nb.jit(nopython=True, parallel=True)
+@nb.jit(nopython=True)
 def mult_vec(a, b):
     m, n = np.shape(a)[0], np.shape(b)[0]
     if m != n: raise ValueError("arguments don't have the same size")
 
     sum = 0
 
-    for i in nb.prange(n):
+    for i in range(n):
         sum += a[i]*b[i]
 
     return sum
@@ -43,10 +44,10 @@ def qr(A):
     R = np.zeros((n, n), dtype="float64")
 
     for i in range(n):
-        R[i, i] = np.sqrt(Q[:, i] @ Q[:, i])
+        R[i, i] = np.sqrt(mult_vec(Q[:, i], Q[:, i]))
         Q[:, i] /= R[i, i]
         for j in range(i+1, n):
-            R[i, j] = Q[:, i] @ Q[:, j]
+            R[i, j] = mult_vec(Q[:, i], Q[:, j])
             Q[:, j] -= R[i, j] * Q[:, i]
 
     return Q, R
@@ -57,7 +58,10 @@ def lstsq(A, B):
 
     Q, R = qr(A)
 
-    B_ = Q.T @ B
+    if len(np.shape(B)) > 1:
+        B_ = mult(Q.T, B)
+    else:
+        B_ = mult(Q.T, np.array([[i] for i in B]))
 
     X = np.zeros(np.shape(B_), dtype="float64")
 
@@ -93,3 +97,7 @@ def give_control_points(P, n, p=3):
     X = lstsq(A, P)
 
     return X, T
+
+
+if __name__ == "__main__":
+    print(lstsq(np.array([[1, 2], [3, 4]], dtype="float64"), np.array([1, 2])))
