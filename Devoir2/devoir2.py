@@ -65,13 +65,15 @@ def plot_perf(N, min_size, max_size):
 
     plt.loglog(size[:-2], moving_average(lu_perf))
     plt.loglog(size[:-2], moving_average(cholesky_perf))
+    plt.loglog(size[:-2], 1e-9*size[:-2]**3, linestyle="dashed")
 
     plt.grid(which="major", linestyle="-")
     plt.grid(which="minor", linestyle=":")
 
-    plt.legend(["LU", "Cholesky"])
+    plt.legend(["LU", "Cholesky", "$\mathcal{O}(2m^3/3)$"])
 
-    plt.show()
+    # plt.show()
+    plt.savefig("rapport/images/complcomp.svg", format="svg")
 
     plt.figure()
 
@@ -80,15 +82,16 @@ def plot_perf(N, min_size, max_size):
     plt.xlabel("size")
     plt.ylabel("LU/Cholesky time ratio")
 
-    plt.plot(size[:-2], moving_average(lu_perf)/moving_average(cholesky_perf))
-    plt.plot(size, np.ones(N)*2)
+    plt.loglog(size[:-2], moving_average(lu_perf)/moving_average(cholesky_perf))
+    plt.loglog(size, np.ones(N)*2)
 
     plt.grid(which="major", linestyle="-")
     plt.grid(which="minor", linestyle=":")
 
     plt.legend(["LU/Cholesky", "ratio = 2"])
 
-    plt.show()
+    # plt.show()
+    plt.savefig("rapport/images/complratio.svg", format="svg")
 
 
 def moving_average(a, n=3):
@@ -108,10 +111,11 @@ def cond_test(A, b, N):
     norm_y = np.linalg.norm(y, 2)
     norm_A = np.linalg.norm(A, 2)
     norm_x = np.linalg.norm(x, 2)
+    norm_b = np.linalg.norm(b, 2)
 
     # min(_, 1) car erreurs d'arrondissement possibles,
     # rendant y plus grand que b en norme quand c'est censé être égal
-    theta = np.arccos(min(norm_y/np.linalg.norm(b, 2), 1))
+    theta = np.arccos(min(norm_y/norm_b, 1))
 
     eta = norm_A*norm_x/norm_y
 
@@ -119,35 +123,62 @@ def cond_test(A, b, N):
     kappa_x_b = kappa_A/(eta*np.cos(theta))
     kappa_x_A = kappa_A + kappa_A*kappa_A*np.tan(theta)/eta
 
-    deltas = np.logspace(-12, 12, N, dtype="float64")
-    dA_norms = np.zeros(N)
-    dx_norms = np.zeros(N)
+    deltas = np.logspace(-12, 0, N, dtype="float64")
+    d_norms = np.zeros((N, 4))
     for i in range(N):
         dA = np.random.random((m, n))*deltas[i]
-        dA_norms[i] = np.linalg.norm(dA, 2)/norm_A
+        d_norms[i][0] = np.linalg.norm(dA, 2)/norm_A
 
         dx = np.linalg.solve(A+dA, b)-x
-        dx_norms[i] = np.linalg.norm(dx, 2)/norm_x
+        d_norms[i][1] = np.linalg.norm(dx, 2)/norm_x
+
+        db = np.random.random(n)*deltas[i]
+        d_norms[i][2] = np.linalg.norm(db, 2)/norm_b
+
+        dx = np.linalg.solve(A, b+db)-x
+        d_norms[i][3] = np.linalg.norm(dx, 2)/norm_x
+
+    d_norms = np.array(sorted(d_norms, key=lambda x: x[0]))
 
     plt.figure()
 
-    plt.title("Conditioning number experiment")
+    plt.title("Perturbation when A is disturbed (m = %d)"%m)
 
-    plt.xlabel("||dA||/||A||")
-    plt.ylabel("||dx||/||x||")
+    plt.xlabel("||$\delta$A||/||A||")
+    plt.ylabel("||$\delta$x||/||x||")
 
-    plt.xscale("log")
-    plt.yscale("log")
-
-    plt.plot(dA_norms, dx_norms)
-    plt.plot(dA_norms, dA_norms*kappa_x_A)
+    plt.loglog(d_norms[:, 0], d_norms[:, 1])
+    plt.loglog(d_norms[:, 0], d_norms[:, 0]*kappa_x_A)
 
     plt.grid(which="major", linestyle="-")
     plt.grid(which="minor", linestyle=":")
 
-    plt.legend(["perturbation", "$\kappa$*||dA||/||A||"])
+    plt.legend(["relative solution perturbation",
+                "perturbation upper bound ($\kappa_A$*||$\delta$A||/||A||)"])
 
-    plt.show()
+    plt.savefig("rapport/images/condA%d.svg"%m, format="svg")
+    # plt.show()
+
+    d_norms = np.array(sorted(d_norms, key=lambda x: x[2]))
+
+    plt.figure()
+
+    plt.title("Perturbation when b is disturbed (m = %d)"%m)
+
+    plt.xlabel("||$\delta$b||/||b||")
+    plt.ylabel("||$\delta$x||/||x||")
+
+    plt.loglog(d_norms[:, 2], d_norms[:, 3])
+    plt.loglog(d_norms[:, 2], d_norms[:, 2]*kappa_x_b)
+
+    plt.grid(which="major", linestyle="-")
+    plt.grid(which="minor", linestyle=":")
+
+    plt.legend(["relative solution perturbation",
+                "perturbation upper bound ($\kappa_b$*||$\delta$b||/||b||)"])
+
+    plt.savefig("rapport/images/condb%d.svg"%m, format="svg")
+    # plt.show()
 
 
 if __name__ == "__main__":
@@ -175,7 +206,12 @@ if __name__ == "__main__":
     # print(f"{R=}")
     # print(f"{R2=}")
 
-    # plot_perf(20, 5, 10000)
+    plot_perf(100, 5, 5000)
 
-    cond_test(np.random.random((100, 100)),
-              np.random.random(100), 1000)
+    size = 100
+    cond_test(np.random.random((size, size)),
+              np.random.random(size), 1000)
+    
+    size = 2
+    cond_test(np.random.random((size, size)),
+              np.random.random(size), 1000)
