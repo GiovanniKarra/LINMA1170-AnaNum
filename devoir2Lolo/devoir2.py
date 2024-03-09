@@ -66,23 +66,27 @@ def time_tests_lu(n=3):
     plt.grid()
     plt.savefig('devoir2Lolo/images/lu_time_tests.svg')  # Change the path and file extension to .svg
     print("LU time tests done")
+    return times, A
     
 
-time_tests_lu(4)
+times, A = time_tests_lu(1)
     
-def compare_LU_cholesky(n=3):
+def compare_LU_cholesky(n=3, times = None, A=None):
     sizes = np.logspace(1, 4, num=20, dtype=int)
     decomp_lu(np.random.rand(3, 3)) 
-    A = [0]*len(sizes)
-    times = np.zeros(len(sizes))
-    for i in range(len(sizes)):
-        B = np.random.random((sizes[i], sizes[i]))
-        A[i] = B.T @ B
-        print(sizes[i])
-        for j in range(n):
-            times[i] -= time.process_time()/n
-            decomp_lu(A[i])  
-            times[i] += time.process_time()/n
+    
+    if times is None:
+        if A is None:
+            A = []
+        times = np.zeros(len(sizes))
+        for i in range(len(sizes)):
+            B = np.random.random((sizes[i], sizes[i]))
+            A.append(B.T @ B)
+            print(sizes[i])
+            for j in range(n):
+                times[i] -= time.process_time()/n
+                decomp_lu(A[i])  
+                times[i] += time.process_time()/n
     
     times2 = np.zeros(len(sizes))
     for i in range(len(sizes)):
@@ -120,7 +124,7 @@ def compare_LU_cholesky(n=3):
 
     
 
-compare_LU_cholesky(4)
+compare_LU_cholesky(1,times,A)
 
 
 
