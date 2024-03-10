@@ -36,10 +36,10 @@ avec
 Pour vérifier cette borne numériquement, il suffit de générer des perturbations de différentes tailles, et de plotter la norme relative de la perturbation de l'entrée contre celle de la solution, comme nous pouvons le voir ci-dessous.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.5]{../../Devoir1/rapport/images/coeur1.png}
-    \includegraphics[scale=0.5]{../../Devoir1/rapport/images/coeur1.png}
-    \includegraphics[scale=0.5]{../../Devoir1/rapport/images/coeur1.png}
-    \includegraphics[scale=0.5]{../../Devoir1/rapport/images/coeur1.png}
+    \includesvg[scale=0.5]{images/condA2}
+    \includesvg[scale=0.5]{images/condb2}
+    \includesvg[scale=0.5]{images/condA100}
+    \includesvg[scale=0.5]{images/condb100}
 \end{figure}
 Nous pouvons voir que la perturbation empirique de la solution ne dépasse jamais la borne calculée mathématiquement.
 
@@ -74,14 +74,14 @@ Où $i$ est une ligne fixée, et $M_{ij}$ le déterminant de la sous-matrice obt
 Les autres éléments de la dernière ligne sont nuls, et nous savons que $\det(A_{k+1}^{elim}) > 0$ grâce au postulat de départ. Nous savons que $\det(A_k^{elim}) > 0$, donc pour que $(6)$ soit vérifiée, nous devons nécessairement avoir $a^{elim}_{k+1k+1} = a_{k+1k+1} - C > 0$, et donc nous n'avons pas besoin de pivoter.\\\\
 Démontrons un cas de base avec
 \begin{align}
-    A_k = \left[\begin{array}{cc}
+    A_2 = \left[\begin{array}{cc}
         a & b\\
         c & d
     \end{array}\right], ~~~ a > 0, ~~~ d > 0, ~~~ \det(A) = ad - bc > 0
 \end{align}
 En appliquant l'élimination gaussienne, nous obtenons
 \begin{align}
-    A_k = \left[\begin{array}{cc}
+    A_2 = \left[\begin{array}{cc}
         a & b\\
         0 & d - \frac{bc}{a}
     \end{array}\right] =
@@ -107,11 +107,12 @@ avec
 \begin{align}
     \tilde{A} = A^TA ~~~~~~~~~~~ \tilde{b} = A^Tb
 \end{align}
-Au lieu d'utiliser la décomposition $LU$ pour résoudre ce système, nous pouvons utiliser la factorisation de Cholesky, qui exploite la symétrie et la définie-positivité de $\tilde{A}$ pour accélérer le processus. En effet, la factorisation de Cholesky utilise en théorie deux fois moins d'opérations que la décomposition $LU$, et nous pouvons vérifier ceci empiriquement sur les figures ci-dessous.
+Au lieu d'utiliser la décomposition $LU$ pour résoudre ce système, nous pouvons utiliser la factorisation de Cholesky $A = R^TR$, avec $R$ triangulaire supérieure, qui exploite la symétrie et la définie-positivité de $\tilde{A}$ pour accélérer le processus. En effet, la factorisation de Cholesky utilise en théorie deux fois moins d'opérations que la décomposition $LU$, et nous pouvons vérifier ceci empiriquement sur les figures ci-dessous\footnote{LU sans pivotage est une fonction faite maison avec numba, LU avec pivotage et Cholesky sont parcontre des fonctions scipy. Le test des performances pour LU sans pivotage a été arrêté à partir des matrices de taille 2000 par soucis de temps.}.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.5]{../../Devoir1/rapport/images/coeur1.png}
-    \includegraphics[scale=0.5]{../../Devoir1/rapport/images/coeur1.png}
+    \includesvg[scale=0.5]{images/complcomp}
+    \includesvg[scale=0.5]{images/complratio}
 \end{figure}
+
 
 \end{document}

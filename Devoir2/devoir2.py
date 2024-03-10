@@ -41,12 +41,20 @@ def cholesky(A):
 
 def plot_perf(N, min_size, max_size):
     size = np.logspace(np.log10(min_size), np.log10(max_size), N, dtype=int)
+    lu_nopiv_perf = np.zeros(N)
     lu_perf = np.zeros(N)
     cholesky_perf = np.zeros(N)
+
+    lu(np.array([[1, 1], [1, 1]]))
 
     for i in range(N):
         A = np.random.random((size[i], size[i]))*100
         A = A @ A.T
+
+        if size[i] < 2000:
+            timer = perf_counter()
+            lu(A)
+            lu_nopiv_perf[i] = perf_counter() - timer
 
         timer = perf_counter()
         sp.lu(A)
@@ -60,9 +68,10 @@ def plot_perf(N, min_size, max_size):
 
     plt.title("Complexity comparison of LU vs Cholesky factorization")
 
-    plt.xlabel("size")
+    plt.xlabel("matrix size")
     plt.ylabel("execution time [s]")
 
+    plt.loglog(size, lu_nopiv_perf)
     plt.loglog(size[:-2], moving_average(lu_perf))
     plt.loglog(size[:-2], moving_average(cholesky_perf))
     plt.loglog(size[:-2], 1e-9*size[:-2]**3, linestyle="dashed")
@@ -70,7 +79,7 @@ def plot_perf(N, min_size, max_size):
     plt.grid(which="major", linestyle="-")
     plt.grid(which="minor", linestyle=":")
 
-    plt.legend(["LU", "Cholesky", "$\mathcal{O}(2m^3/3)$"])
+    plt.legend(["LU (no pivotage)", "LU", "Cholesky", "$\mathcal{O}(2m^3/3)$"])
 
     # plt.show()
     plt.savefig("rapport/images/complcomp.svg", format="svg")
@@ -206,12 +215,12 @@ if __name__ == "__main__":
     # print(f"{R=}")
     # print(f"{R2=}")
 
-    plot_perf(100, 5, 5000)
+    plot_perf(100, 5, 10000)
 
-    size = 100
-    cond_test(np.random.random((size, size)),
-              np.random.random(size), 1000)
+    # size = 100
+    # cond_test(np.random.random((size, size)),
+    #           np.random.random(size), 1000)
     
-    size = 2
-    cond_test(np.random.random((size, size)),
-              np.random.random(size), 1000)
+    # size = 2
+    # cond_test(np.random.random((size, size)),
+    #           np.random.random(size), 1000)
