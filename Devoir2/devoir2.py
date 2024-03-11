@@ -71,7 +71,8 @@ def plot_perf(N, min_size, max_size):
     plt.xlabel("matrix size")
     plt.ylabel("execution time [s]")
 
-    plt.loglog(size, lu_nopiv_perf)
+    stop_ind = list(lu_nopiv_perf).index(0)
+    plt.loglog(size[:stop_ind], lu_nopiv_perf[:stop_ind])
     plt.loglog(size[:-2], moving_average(lu_perf))
     plt.loglog(size[:-2], moving_average(cholesky_perf))
     plt.loglog(size[:-2], 1e-9*size[:-2]**3, linestyle="dashed")
@@ -88,11 +89,11 @@ def plot_perf(N, min_size, max_size):
 
     plt.title("Complexity ratio between LU and Cholesky factorization")
 
-    plt.xlabel("size")
+    plt.xlabel("matrix size")
     plt.ylabel("LU/Cholesky time ratio")
 
-    plt.loglog(size[:-2], moving_average(lu_perf)/moving_average(cholesky_perf))
-    plt.loglog(size, np.ones(N)*2)
+    plt.plot(size[:-2], moving_average(lu_perf)/moving_average(cholesky_perf))
+    plt.plot(size, np.ones(N)*2, linestyle="dashed")
 
     plt.grid(which="major", linestyle="-")
     plt.grid(which="minor", linestyle=":")
