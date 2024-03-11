@@ -4,11 +4,11 @@ import time
 import matplotlib.pyplot as plt
 import scipy.linalg as la
 
-@nb.njit()
+@nb.jit()
 def decomp_lu(A):
     n = A.shape[0]
     L = np.eye(n)
-    U = A
+    U = A.copy()
     for i in range(n-1):
         for j in range(i+1, n):
             L[j, i] = U[j, i] / U[i, i]
@@ -36,9 +36,9 @@ def time_tests_lu(n=3):
         A[i] = B.T @ B
         print(sizes[i])
         for j in range(n):
-            times[i] -= time.process_time()/n
+            times[i] -= time.perf_counter()/n
             decomp_lu(A[i])  
-            times[i] += time.process_time()/n
+            times[i] += time.perf_counter()/n
             
         
     
@@ -84,18 +84,18 @@ def compare_LU_cholesky(n=3, times = None, A=None):
             A.append(B.T @ B)
             print(sizes[i])
             for j in range(n):
-                times[i] -= time.process_time()/n
-                decomp_lu(A[i])  
-                times[i] += time.process_time()/n
+                times[i] -= time.perf_counter()/n
+                np.linalg.lu(A[i])  
+                times[i] += time.perf_counter()/n
     
     times2 = np.zeros(len(sizes))
     for i in range(len(sizes)):
         
         print(sizes[i])
         for j in range(n):
-            times2[i] -= time.process_time()
+            times2[i] -= time.perf_counter()/n
             np.linalg.cholesky(A[i])
-            times2[i] += time.process_time()
+            times2[i] += time.perf_counter()/n
             
 
         
@@ -124,7 +124,33 @@ def compare_LU_cholesky(n=3, times = None, A=None):
 
     
 
-compare_LU_cholesky(1,times,A)
+compare_LU_cholesky(1,A=A)
+
+def condition() :
+    A = np.random.randn(3,3)
+    A = A.T @ A
+    b = np.random.randn(3)
+    b = A.T @ b
+    x = np.linalg.solve(A, b)
+    kappa = np.linalg.cond(A)
+    p = 1000
+    delta = np.zeros((p,3))
+    for k in range(p):
+        Ap = A + 1e-10 * np.random.randn(3,3)
+        xp = np.linalg.solve(Ap, b)
+        delta[k,:] = ((xp - x) / np.linalg.norm(x)) / (np.linalg.norm(Ap - A) / np.linalg.norm(A))
+    fig,ax = plt.subplots()
+    ax.scatter(delta[:,0], delta[:,1])
+    circle = plt.Circle((0.0,0.0), kappa, fill=False)
+    ax.add_patch(circle)
+    plt.savefig('devoir2Lolo/images/condition.svg') 
+    
+    print(f'{kappa = }')
+    print(f'{np.max(np.linalg.norm(delta, axis=1)) = }')
+    plt.show()
+
+condition()
+
 
 
 
