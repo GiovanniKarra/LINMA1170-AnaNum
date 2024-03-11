@@ -139,13 +139,13 @@ def cond_test(A, b, N):
         dA = np.random.random((m, n))*deltas[i]
         d_norms[i][0] = np.linalg.norm(dA, 2)/norm_A
 
-        dx = np.linalg.solve(A+dA, b)-x
+        dx = np.linalg.solve((A+dA).T@(A+dA), (A+dA).T@b)-x
         d_norms[i][1] = np.linalg.norm(dx, 2)/norm_x
 
         db = np.random.random(n)*deltas[i]
         d_norms[i][2] = np.linalg.norm(db, 2)/norm_b
 
-        dx = np.linalg.solve(A, b+db)-x
+        dx = np.linalg.solve(A.T@A, A.T@(b+db))-x
         d_norms[i][3] = np.linalg.norm(dx, 2)/norm_x
 
     d_norms = np.array(sorted(d_norms, key=lambda x: x[0]))
@@ -216,12 +216,12 @@ if __name__ == "__main__":
     # print(f"{R=}")
     # print(f"{R2=}")
 
-    plot_perf(100, 5, 10000)
+    # plot_perf(100, 5, 10000)
 
-    # size = 100
-    # cond_test(np.random.random((size, size)),
-    #           np.random.random(size), 1000)
+    size = 100
+    cond_test(np.random.random((size, size)),
+              np.random.random(size), 1000)
     
-    # size = 2
-    # cond_test(np.random.random((size, size)),
-    #           np.random.random(size), 1000)
+    size = 2
+    cond_test(np.random.random((size, size)),
+              np.random.random(size), 1000)
