@@ -139,10 +139,24 @@ def condition() :
     ax.scatter(delta[:,0], delta[:,1])
     circle = plt.Circle((0.0,0.0), kappa, fill=False)
     ax.add_patch(circle)
-    plt.savefig('devoir2Lolo/images/condition_A.svg') 
+    plt.title('Condition number of A')
+    plt.savefig('devoir2Lolo/images/condition_A.pdf') 
     
     print(f'{kappa = }')
     print(f'{np.max(np.linalg.norm(delta, axis=1)) = }')
+
+    deltab = np.zeros((p,2))
+    for k in range(p):
+        bp = b + 1e-10 * np.random.randn(2)
+        xp = np.linalg.solve(A.T @ A, A.T @ bp)
+        deltab[k,:] = ((xp - x) / np.linalg.norm(x)) / (np.linalg.norm(bp - b) / np.linalg.norm(b))
+    fig,ax = plt.subplots()
+    ax.scatter(deltab[:,0], deltab[:,1])
+    circle = plt.Circle((0.0,0.0), kappa, fill=False)
+    ax.add_patch(circle)
+    #Add title
+    plt.title('Condition number of B')
+    plt.savefig('devoir2Lolo/images/condition_b.pdf')
     plt.show()
 
 condition()

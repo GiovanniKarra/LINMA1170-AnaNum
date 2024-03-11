@@ -37,16 +37,29 @@ $$ \frac{||\delta x||}{||x||} \leq ||A'||||A'^{-1}|| \frac{||\delta A'||}{||A'||
 
 Ainsi, $ \kappa(A^T A) = ||A^T A||||(A^T A)^{-1}|| $ 
 
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\textwidth]{images/condition_A.pdf}
+\caption{Conditionnement par rapport à A}
+\end{figure}
+
+
+
 En suivant un raisonnement similaire pour une perturbation sur B, on obtient :
 $$ \kappa(A^T B) = ||A^T B||||(A^T A)^{-1}|| $$
 
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\textwidth]{images/condition_b.pdf}
+\caption{Conditionnement par rapport à B}
+\end{figure}
 \section*{Question 2}
 
 La complexité est $O(n^3)$ pour la décomposition LU. L'algorithme n'est pas parallélisable car les calculs dépendent des résultats précédents.
 %Add image
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.5\textwidth]{images/lu_time_tests.pdf}
+\includegraphics[width=0.85\textwidth]{images/lu_time_tests.pdf}
 \caption{Temps d'exécution de la décomposition LU en fonction de la taille de la matrice}
 \end{figure}
 
@@ -57,15 +70,15 @@ Pour des équations normales de la forme $A^T A x = A^T B$, on a que $A^T A$ est
 On peut donc effectuer l'élimination gaussienne sur les deux côtés de la diagonale de la matrice, étant donné que la matrice est symétrique.
 On obtient alors la décomposition de Cholesky dont la complexité est $O(n^3/3)$. On effectue ainsi deux fois moins d'opérations.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.5\textwidth]{images/lu_cholesky_time_tests.pdf}
+\includegraphics[width=0.85\textwidth]{images/lu_cholesky_time_tests.pdf}
 \caption{Temps d'exécution de la décomposition LU et de Cholesky en fonction de la taille de la matrice}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.5\textwidth]{images/lu_cholesky_ratio.pdf}
+\includegraphics[width=0.85\textwidth]{images/lu_cholesky_ratio.pdf}
 \caption{Rapport des temps d'exécution de la décomposition LU et de Cholesky en fonction de la taille de la matrice}
 
 \end{figure}
