@@ -1,4 +1,6 @@
 \documentclass[11pt]{article}
+\usepackage{svg}
+\usepackage{graphicx}
 
 \pagestyle{plain}
 \title{Rapport 2 : Décomposition LU et moindres carrés}
@@ -40,9 +42,34 @@ $$ \kappa(A^T B) = ||A^T B||||(A^T A)^{-1}|| $$
 
 \section*{Question 2}
 
-La complexité est O(n^3) pour la décomposition LU. L'algorithme n'est pas parallélisable car les calculs dépendent des résultats précédents.
+La complexité est $O(n^3)$ pour la décomposition LU. L'algorithme n'est pas parallélisable car les calculs dépendent des résultats précédents.
+%Add image
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{images/lu_time_tests.pdf}
+\caption{Temps d'exécution de la décomposition LU en fonction de la taille de la matrice}
+\end{figure}
+
 \section*{Question 3}
 
 \section*{Question 4}
+Pour des équations normales de la forme $A^T A x = A^T B$, on a que $A^T A$ est symétrique et définie positive. 
+On peut donc effectuer l'élimination gaussienne sur les deux côtés de la diagonale de la matrice, étant donné que la matrice est symétrique.
+On obtient alors la décomposition de Cholesky dont la complexité est $O(n^3/3)$. On effectue ainsi deux fois moins d'opérations.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{images/lu_cholesky_time_tests.pdf}
+\caption{Temps d'exécution de la décomposition LU et de Cholesky en fonction de la taille de la matrice}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{images/lu_cholesky_ratio.pdf}
+\caption{Rapport des temps d'exécution de la décomposition LU et de Cholesky en fonction de la taille de la matrice}
+
+\end{figure}
+
+
 
 \end{document}

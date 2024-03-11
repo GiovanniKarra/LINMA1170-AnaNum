@@ -14,23 +14,15 @@ def decomp_lu(A):
             L[j, i] = U[j, i] / U[i, i]
             U[j, i:] = U[j, i:] - L[j, i] * U[i, i:]
     return L, U
-
-def decomp_lu2(A):
-    n = A.shape[0]
-    L = np.eye(n)
-    U = A
-    for i in range(n-1):
-        for j in range(i+1, n):
-            L[j, i] = U[j, i] / U[i, i]
-            U[j, i:] = U[j, i:] - L[j, i] * U[i, i:]
-    return L, U
+    
 
 
 def time_tests_lu(n=3):
-    sizes = np.logspace(1, 4, num=20, dtype=int)
+    sizes = np.logspace(1, np.log10(2000), num=40, dtype=int)
     decomp_lu(np.random.rand(3, 3)) 
     A = [0]*len(sizes)
     times = np.zeros(len(sizes))
+    times2 = np.zeros(len(sizes))
     for i in range(len(sizes)):
         B = np.random.random((sizes[i], sizes[i]))
         A[i] = B.T @ B
@@ -39,6 +31,9 @@ def time_tests_lu(n=3):
             times[i] -= time.perf_counter()/n
             decomp_lu(A[i])  
             times[i] += time.perf_counter()/n
+            times2[i] -= time.perf_counter()/n
+            la.lu(A[i])
+            times2[i] += time.perf_counter()/n
             
         
     
@@ -56,7 +51,7 @@ def time_tests_lu(n=3):
     
     plt.figure(figsize=(10, 5))
     plt.loglog(sizes, times,label='LU Numba')
-    #plt.loglog(sizes, times2,label='LU no Numba')
+    plt.loglog(sizes, times2,label='Scipy LU')
     plt.loglog(sizes, [10**-5 * (sizes[i]/sizes[0])**2 for i in range(len(sizes))], label='O(n^2)', linestyle='--')
     plt.loglog(sizes, [10**-5 * (sizes[i]/sizes[0])**3 for i in range(len(sizes))], label='O(n^3)', linestyle='--')
     plt.xlabel('Size')
@@ -64,7 +59,7 @@ def time_tests_lu(n=3):
     plt.title('Time tests of decomp_lu(A) according to matrix size from 10 to 10000 with A nxn')
     plt.legend()
     plt.grid()
-    plt.savefig('devoir2Lolo/images/lu_time_tests.svg')  # Change the path and file extension to .svg
+    plt.savefig('devoir2Lolo/images/lu_time_tests.pdf')  # Change the path and file extension to .svg
     print("LU time tests done")
     return times, A
     
@@ -72,7 +67,7 @@ def time_tests_lu(n=3):
 times, A = time_tests_lu(1)
     
 def compare_LU_cholesky(n=3, times = None, A=None):
-    sizes = np.logspace(1, 4, num=20, dtype=int)
+    sizes = np.logspace(1, np.log10(2000), num=40, dtype=int)
     decomp_lu(np.random.rand(3, 3)) 
     
     if times is None:
@@ -85,7 +80,7 @@ def compare_LU_cholesky(n=3, times = None, A=None):
             print(sizes[i])
             for j in range(n):
                 times[i] -= time.perf_counter()/n
-                np.linalg.lu(A[i])  
+                la.lu(A[i])  
                 times[i] += time.perf_counter()/n
     
     times2 = np.zeros(len(sizes))
@@ -107,43 +102,44 @@ def compare_LU_cholesky(n=3, times = None, A=None):
     plt.loglog(sizes, [10**-5 * (sizes[i]/sizes[0])**3 for i in range(len(sizes))], label='O(n^3)', linestyle='--')
     plt.xlabel('Size')
     plt.ylabel('Time')
-    plt.title('Time tests of decomp_lu(A) and np.linalg.cholesky(A) according to matrix size from 10 to 10000 with A nxn')
+    plt.title('Time tests of scipy.linalg.lu(A) and np.linalg.cholesky(A) according to matrix size from 10 to 10000 with A nxn')
     plt.legend()
     plt.grid()
-    plt.savefig('devoir2Lolo/images/lu_cholesky_time_tests.svg')    
+    plt.savefig('devoir2Lolo/images/lu_cholesky_time_tests.pdf')    
 
     ratio = [times[i]/times2[i] for i in range(len(sizes))]
+    print("Ratio tends to : ", ratio[-1])
 
     plt.figure(figsize=(10, 5))
-    plt.plot(sizes, ratio)
+    plt.loglog(sizes, ratio)
+    #Add Red line for 2 
+    plt.axhline(y=2, color='r', linestyle='--')
     plt.xlabel('Size')
     plt.ylabel('Ratio')
     plt.title('Ratio of time between decomp_lu(A) and np.linalg.cholesky(A) according to matrix size from 10 to 10000 with A nxn')
     plt.grid()
-    plt.savefig('devoir2Lolo/images/lu_cholesky_ratio.svg')  # Change the path and file extension to .svg
+    plt.savefig('devoir2Lolo/images/lu_cholesky_ratio.pdf')  # Change the path and file extension to .svg
 
     
 
 compare_LU_cholesky(1,A=A)
 
 def condition() :
-    A = np.random.randn(3,3)
-    A = A.T @ A
-    b = np.random.randn(3)
-    b = A.T @ b
-    x = np.linalg.solve(A, b)
+    A = np.random.randn(2,2)
+    b = np.random.randn(2)
+    x = np.linalg.solve(A.T@A, A.T@b)
     kappa = np.linalg.cond(A)
     p = 1000
-    delta = np.zeros((p,3))
+    delta = np.zeros((p,2))
     for k in range(p):
-        Ap = A + 1e-10 * np.random.randn(3,3)
-        xp = np.linalg.solve(Ap, b)
+        Ap = A + 1e-10 * np.random.randn(2,2)
+        xp = np.linalg.solve(Ap.T @ Ap, Ap.T @ b)
         delta[k,:] = ((xp - x) / np.linalg.norm(x)) / (np.linalg.norm(Ap - A) / np.linalg.norm(A))
     fig,ax = plt.subplots()
     ax.scatter(delta[:,0], delta[:,1])
     circle = plt.Circle((0.0,0.0), kappa, fill=False)
     ax.add_patch(circle)
-    plt.savefig('devoir2Lolo/images/condition.svg') 
+    plt.savefig('devoir2Lolo/images/condition_A.svg') 
     
     print(f'{kappa = }')
     print(f'{np.max(np.linalg.norm(delta, axis=1)) = }')
