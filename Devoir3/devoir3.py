@@ -1,9 +1,8 @@
 import numba as nb
 import numpy as np
-import scipy.linalg as sp
 
 
-@nb.jit(nopython=True)
+@nb.jit(nopython=True, fastmath=True)
 def mult(A, B):
 	m, n = np.shape(A)
 	n2, p = np.shape(B)
@@ -20,7 +19,7 @@ def mult(A, B):
 	return C
 
 
-@nb.jit(nopython=True)
+@nb.jit(nopython=True, fastmath=True)
 def mult_vec(a, b):
 	m, n = np.shape(a)[0], np.shape(b)[0]
 	assert n == m
@@ -33,7 +32,7 @@ def mult_vec(a, b):
 	return sum
 
 
-@nb.jit(nopython=True)
+@nb.jit(nopython=True, fastmath=True)
 def sign(x, eps=1e-12):
 	norm = np.abs(x)
 	if norm > eps:
@@ -41,7 +40,7 @@ def sign(x, eps=1e-12):
 	
 	return 1
 
-@nb.jit(nopython=True)
+@nb.jit(nopython=True, fastmath=True)
 def to_matrix(a):
 	n = np.shape(a)[-1]
 	ret = np.empty((1, n), dtype="complex")
@@ -63,7 +62,7 @@ def round_matrix(A, eps):
 				A[i, j] = complex(0, A[i, j].imag)
 
 
-@nb.jit(nopython=True)
+@nb.jit(nopython=True, fastmath=True)
 def subdiag_small(A, eps):
 	m = np.shape(A)[0]
 	for i in range(1, m):
@@ -73,8 +72,8 @@ def subdiag_small(A, eps):
 	return True
 
 
-@nb.jit(nopython=True)
-def hessenberg(A, Q):
+@nb.jit(nopython=True, fastmath=True)
+def hessenberg(A, Q, opti=False):
 	n = np.shape(A)[0]
 	v = np.copy(A)
 
@@ -92,7 +91,7 @@ def hessenberg(A, Q):
 		A[i+1:, i:] -= mult(2*x_mat.T, mult(x_mat_conj, A[i+1:, i:]))
 		A[:, i+1:] -= 2*mult(mult(A[:, i+1:], x_mat.T), x_mat_conj)
 	
-	Q[...] = np.identity(n, dtype="complex")
+	if not opti: Q[...] = np.identity(n, dtype="complex")
 	for i in range(n-3, -1, -1):
 		x = v[i+1:, i]
 		x_mat = to_matrix(x)
@@ -101,7 +100,7 @@ def hessenberg(A, Q):
 		Q[i+1:, i+1:] -= 2*mult(x_mat.T, mult(x_mat_conj, Q[i+1:, i+1:]))
 
 
-@nb.jit(nopython=True)
+@nb.jit(nopython=True, fastmath=True)
 def givens(a, b):
 	phi = np.angle(b)-np.angle(a)
 	comp = np.exp(1j*phi)
@@ -109,7 +108,7 @@ def givens(a, b):
 		np.abs(b)/np.sqrt(np.abs(a)**2 + np.abs(b)**2), comp
 
 
-@nb.jit(nopython=True)
+@nb.jit(nopython=True, fastmath=True)
 def step_qr(H, Q, m):
 	c = np.empty(m-1, dtype="complex")
 	s = np.empty(m-1, dtype="complex")
@@ -118,17 +117,17 @@ def step_qr(H, Q, m):
 		c[i], s[i], t[i] = givens(H[i, i], H[i+1, i])
 		g_star = np.array([[c[i], s[i]*np.conj(t[i])],
 					 	   [-s[i]*t[i], c[i]]], dtype="complex")
-		H[i:i+2, i:m] = mult(g_star, H[i:i+2, i:m])
+		H[i:i+2, i:] = mult(g_star, H[i:i+2, i:])
 
 	for i in range(m-1):
 		g = np.array([[c[i], -s[i]*np.conj(t[i])],
 					  [s[i]*t[i], c[i]]], dtype="complex")
 		H[:i+2, i:i+2] = mult(H[:i+2, i:i+2], g)
 
-		Q[:m, i:i+2] = mult(Q[:m, i:i+2], g)
+		Q[:, i:i+2] = mult(Q[:, i:i+2], g)
 
 
-@nb.jit(nopython=True)
+@nb.jit(nopython=True, fastmath=True)
 def wilkinson_shift(B):
 	a = B[0, 0]; b = B[0, 1]; c = B[1, 0]; d = B[1, 1]
 	aplusd = a+d
@@ -136,7 +135,7 @@ def wilkinson_shift(B):
 	l1 = (aplusd-sqrt_rho)/2; l2 = (aplusd+sqrt_rho)/2
 	return l1 if np.abs(l1-d) < np.abs(l2-d) else l2
 
-@nb.jit(nopython=True)
+@nb.jit(nopython=True, fastmath=True)
 def step_qr_shift(H, Q, m, eps):
 	shift = wilkinson_shift(H[m-2:m, m-2:m])
 
@@ -155,8 +154,8 @@ def step_qr_shift(H, Q, m, eps):
 def solve_qr(A, use_shifts, eps, max_iter):
 	k = -1
 	n = np.shape(A)[0]
-	Q = np.copy(A)
-	hessenberg(A, Q)
+	Q = np.identity(n, dtype="complex")
+	hessenberg(A, Q, opti=True)
 
 	if use_shifts:
 		m = n
