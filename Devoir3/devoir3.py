@@ -1,9 +1,7 @@
+import numba as nb
 import numpy as np
 import scipy.linalg as sp
-import numba as nb
 
-import numba as nb
-import numpy as np
 
 @nb.jit(nopython=True)
 def mult(A, B):
@@ -133,8 +131,8 @@ def step_qr(H, Q, m):
 @nb.jit(nopython=True)
 def wilkinson_shift(B):
 	a = B[0, 0]; b = B[0, 1]; c = B[1, 0]; d = B[1, 1]
-	sqrt_rho = np.sqrt(a**2 + d**2 + 4*b*c - 2*a*d)
 	aplusd = a+d
+	sqrt_rho = np.sqrt((aplusd)**2 + 4*(b*c - a*d))
 	l1 = (aplusd-sqrt_rho)/2; l2 = (aplusd+sqrt_rho)/2
 	return l1 if np.abs(l1-d) < np.abs(l2-d) else l2
 
@@ -148,8 +146,10 @@ def step_qr_shift(H, Q, m, eps):
 	for i in range(m):
 		H[i, i] += shift
 
-	return m-(1 if np.abs(H[m-1, m-2]) < eps else 0)
-
+	if np.abs(H[m-1, m-2]) < eps:
+		return m-1
+	
+	return m
 
 @nb.jit(nopython=True)
 def solve_qr(A, use_shifts, eps, max_iter):
@@ -172,6 +172,9 @@ def solve_qr(A, use_shifts, eps, max_iter):
 			if subdiag_small(A, eps):
 				k = i
 				break
+
+	# np.round(A, 5, out=A)
+	# np.round(Q, 5, out=Q)
 
 	return Q, k
 
