@@ -10,23 +10,50 @@
 \usepackage{svg}
 \usepackage{float}
 
-\title{LINMA1170 - Devoir 2}
+\title{LINMA1170 - Devoir 3}
 \author{Giovanni Karra - 45032100}
 
 \begin{document}
 
 \maketitle
 
-\section*{Question 1}
-Soit une matrice normale $A$ ($A^*A = AA^*$), montrons que dans sa décomposition de Schur ($A = UTU^*$, avec $U$ singulière), $T$ doit être une matrice diagonale. Comme toute matrice carrée a une décomposition de Schur, nous pouvons écrire :
+\section*{Questions théoriques}
+
+\subsection*{Question 1}
+
+Soit une matrice normale $A$ ($A^*A = AA^*$), montrons que dans sa décomposition de Schur ($A = QTQ^*$, avec $Q$ unitaire et $T$ triangulaire supérieure), $T$ doit être une matrice diagonale. Comme toute matrice carrée a une décomposition de Schur, nous pouvons écrire :
 \begin{align}
-	A = UTU^* \Leftrightarrow U^*AU = T\\
-	A^*A = UT^*\underbrace{U^*U}_{=I}TU^* = UT^*TU^*\\
-	AA^* = UTU^*UT^*U^* = UTT^*U^*
+	A = QTQ^* \Leftrightarrow Q^*AQ = T\\
+	TT^* = Q^*A\underbrace{QQ^*}_IA^*Q = Q^*AA^*Q\\
+	T^*T = Q^*A^*\underbrace{QQ^*}_IAQ = Q^*A^*AQ
 \end{align}
-Comme $A$ est normale, nous avons que :
+Comme $A$ est normale, nous savons que $TT^* = T^*T$, avec $T$ triangulaire supérieure ($U$) et $T^*$ triangulaire inférieure ($L$). Nous avons donc:
 \begin{align*}
-	U
+	UL &= LU
 \end{align*}
+En partant de cette égalité, nous pouvons montrer itérativement que $T$ est diagonale.
+\begin{align*}
+	(UL)_{11} = \sum_{k=1}^{n}|t_{1k}|^2 &= |t_{11}|^2 = (LU)_{11}\\
+	\Leftrightarrow \sum_{k=2}^{n}|t_{1k}|^2 = 0 &\Leftrightarrow t_{1k} = 0 ~~~ \forall k \in \{2...n\}\\
+	(UL)_{22} = \sum_{k=2}^{n}|t_{2k}|^2 &= |t_{22}|^2 + \underbrace{|t_{12}|^2}_{=0} = (LU)_{22}\\
+	\Leftrightarrow \sum_{k=3}^{n}|t_{2k}|^2 = 0 &\Leftrightarrow t_{2k} = 0 ~~~ \forall k \in \{3...n\}\\ . \\ . \\ . \\
+	(UL)_{ii} = \sum_{k=i}^{n}|t_{ik}|^2 = \sum_{k=1}^{i}|t_{ki}|^2 &= |t_{ii}|^2 + \underbrace{\sum_{k=1}^{i-1}|t_{ki}|^2}_{= 0} = (LU)_{ii}\\
+	\Leftrightarrow \sum_{k=i+1}^{n}|t_{ik}|^2 = 0 &\Leftrightarrow t_{ik} = 0 ~~~ \forall k \in \{i+1...n\}
+\end{align*}
+Nous pouvons conclure que $T$ est bel et bien diagonale.\\
+Montrons maintenant que si $T$ est diagonale dans une décomposition de Schur, alors la matrice d'origine $A$ est normale. Nous commençons avec:
+\begin{align}
+	AA^* &= QTT^*Q^*\\
+	A^*A &= QT^*TQ^*
+\end{align}
+Comme $T$ est diagonale, nous savons que $TT^* = T^*T$, car dans les deux cas nous avons $elem_{ij} = 0$ si $i \neq j$, et $elem_{ij} = |t_{ij}|^2$ sinon. Nous pouvons donc dire que $QTT^*Q^* = QT^*TQ^*$, et donc que $AA^* = A^*A$.
+
+\subsection*{Question 2}
+Appliquer les algos que d'un côté + moins de mults sur hessenberg + Rayleigh
+
+\subsection*{Question 3}
+Jsp trop s'il faut utiliser la version full calc ou bien un truc plus formel du livre ou quoi
+
+\section*{Analyse de performances}
 
 \end{document}
