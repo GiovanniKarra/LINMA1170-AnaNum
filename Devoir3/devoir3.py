@@ -82,9 +82,9 @@ def hessenberg(A, Q, opti=False):
 	for i in range(n-2):
 		v[i+1:, i] = A[i+1:, i].copy()
 		x = v[i+1:, i]
-		norm_x = np.abs(np.sqrt(mult_vec(x.conjugate(), x)))
+		norm_x = np.sqrt(np.abs(mult_vec(x.conjugate(), x)))
 		x[0] += norm_x*sign(x[0])
-		norm_x = np.abs(np.sqrt(mult_vec(x.conjugate(), x)))
+		norm_x = np.sqrt(np.abs(mult_vec(x.conjugate(), x)))
 		x /= norm_x if norm_x > 1e-12 else 1
 
 		x_mat = to_matrix(x)
@@ -186,34 +186,22 @@ if __name__ == "__main__":
 	# A = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype="complex")
 	# A = np.array([[1+1j, 2+8j, 3+6j], [4, 5+3j, 6], [7+7j, 8, 9]], dtype="complex")
 	# A = np.array([[1+1j]], dtype="complex")
-	# A = np.asarray(np.random.rand(5, 5) * 10, dtype="complex") +\
-	# 	np.asarray(np.random.rand(5, 5) * 10, dtype="complex")*1j
-	A = np.array([[1, 2, 3], [3, 2, 1], [2, 1, 3]], dtype="complex")
+	A = np.asarray(np.random.rand(5, 5) * 10, dtype="complex") +\
+		np.asarray(np.random.rand(5, 5) * 10, dtype="complex")*1j
+	# A = np.array([[1, 2, 3], [3, 2, 1], [2, 1, 3]], dtype="complex")
 	B = A.copy()
 	n = np.shape(A)[0]
 	
 	
 	Q = np.empty((n, n), dtype="complex")
-	# Q, k = solve_qr(A, True, 1e-12, 1000)
+	Q, k = solve_qr(B, True, 1e-12, 10000)
 	# Q, k2 = solve_qr(A, False, 1e-12, 1000)
-	hessenberg(A, Q)
-	for _ in range(10):
-		step_qr(A, Q, n)
+	# hessenberg(A, Q)
 	# round_matrix(A, 1e-12)
 
 	# print(np.allclose(mult(Q, Q.conjugate().T), np.identity(n)))
 	# print(np.allclose(B, mult(mult(Q, A), Q.conjugate().T)))
 	# print(mult(Q, Q.conjugate().T))
-	round_matrix(A, 1e-12)
-	print(A)
-	step_qr(A, Q, n)
-	round_matrix(A, 1e-12)
-	print(A)
-	step_qr(A, Q, n)
-	round_matrix(A, 1e-12)
-	print(A)
-	step_qr(A, Q, n)
-	round_matrix(A, 1e-12)
 	print(A)
 	# print(sp.schur(B, output='complex')[0])
 	# print(mult(mult(Q, A), Q.conjugate().T))
