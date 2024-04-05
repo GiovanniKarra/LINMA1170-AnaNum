@@ -276,7 +276,7 @@ class WindowQR(QMainWindow):
 		self.active_size = self.n
 		self.__org_matrix = np.copy(self.matrix)
 		self.__it = 0
-		self.__bool_shift = False
+		self.__bool_shift = True
 		self.__working = False
 		self.set_matrix = lambda : None
 		self.set_delay = lambda : None
@@ -307,6 +307,12 @@ class WindowQR(QMainWindow):
 	
 	def generate_random_matrix(self):
 		self.__org_matrix = np.random.rand(self.n, self.n) + 1j * np.random.rand(self.n, self.n)
+		self.reset_algorithm()
+		return
+	
+	def generate_specific_matrix(self):
+		# self.__org_matrix = np.array([[1, 2, 3], [3, 2, 1], [2, 1, 3]], dtype="complex")
+		self.__org_matrix = np.identity(self.n, dtype="complex")
 		self.reset_algorithm()
 		return
 
@@ -400,6 +406,9 @@ class WindowQR(QMainWindow):
 		elif (event.key() == Qt.Key_G) and (not self.__working):
 			self.generate_random_matrix()
 			return
+		elif (event.key() == Qt.Key_J) and (not self.__working):
+			self.generate_specific_matrix()
+			return
 		elif (event.key() == Qt.Key_S) and (not self.__working):
 			self.set_shift_mode(not self.__bool_shift)
 			return        
@@ -479,53 +488,121 @@ class WindowQR(QMainWindow):
 				break
 		return
 	
-	# ! A modifier
+
 	def hessenberg(self, A, Q):
 		n = np.shape(A)[0]
-		v = np.empty(n-2, dtype=np.ndarray)
+		v = np.copy(A)
+
 		for i in range(n-2):
-			x = np.copy(A[i+1:, i])[np.newaxis].T
-			x[0, 0] += np.sqrt(x.conjugate().T@x)[0, 0]*\
-				(x[0, 0]/norm if (norm := np.abs(x[0, 0])) > 1e-12 else 1)
-			x /= np.sqrt(x.conjugate().T@x)
+			v[i+1:, i] = A[i+1:, i].copy()
+			x = v[i+1:, i]
+			norm_x = np.abs(np.sqrt(mult_vec(x.conjugate(), x)))
+			x[0] += norm_x*sign(x[0])
+			norm_x = np.abs(np.sqrt(mult_vec(x.conjugate(), x)))
+			x /= norm_x if norm_x > 1e-12 else 1
 
-			v[i] = x
+			x_mat = to_matrix(x)
+			x_mat_conj = x_mat.conjugate()
 
-			A[i+1:, i:] -= 2*x @ (x.conjugate().T@A[i+1:, i:])
-			A[:, i+1:] -= 2*(A[:, i+1:]@x)@x.conjugate().T
+			A[i+1:, i:] -= mult(2*x_mat.T, mult(x_mat_conj, A[i+1:, i:]))
+			A[:, i+1:] -= 2*mult(mult(A[:, i+1:], x_mat.T), x_mat_conj)
 		
 		Q[...] = np.identity(n, dtype="complex")
 		for i in range(n-3, -1, -1):
-			Q[i+1:, i+1:] -= 2*v[i] @ (v[i].conjugate().T@Q[i+1:, i+1:])
+			x = v[i+1:, i]
+			x_mat = to_matrix(x)
+			x_mat_conj = x_mat.conjugate()
 
-		Q[...] = np.matrix.round(Q, decimals=12)
-		A[...] = np.matrix.round(A, decimals=12)
+			Q[i+1:, i+1:] -= 2*mult(x_mat.T, mult(x_mat_conj, Q[i+1:, i+1:]))
 
 	def step_qr(self, H, Q, m):
 		def givens(a, b):
-			return a/np.sqrt(a**2 + b**2), -b/np.sqrt(a**2 + b**2)
+			phi = np.angle(b)-np.angle(a)
+			comp = np.exp(1j*phi)
+			return np.abs(a)/np.sqrt(np.abs(a)**2 + np.abs(b)**2),\
+				np.abs(b)/np.sqrt(np.abs(a)**2 + np.abs(b)**2), comp
 		
-		n = np.shape(H)[0]
-		c = np.empty(n-1, dtype="complex")
-		s = np.empty(n-1, dtype="complex")
-		for i in range(n-1):
-			c[i], s[i] = givens(H[i, i], H[i+1, i])
-			H[i:i+2, i:] = np.array([[c[i], -s[i]], [s[i], c[i]]], dtype="complex")@H[i:i+2, i:]
+		c = np.empty(m-1, dtype="complex")
+		s = np.empty(m-1, dtype="complex")
+		t = np.empty(m-1, dtype="complex")
+		for i in range(m-1):
+			c[i], s[i], t[i] = givens(H[i, i], H[i+1, i])
+			g_star = np.array([[c[i], s[i]*np.conj(t[i])],
+							[-s[i]*t[i], c[i]]], dtype="complex")
+			H[i:i+2, i:] = mult(g_star, H[i:i+2, i:])
 
-		for i in range(n-1):
-			g = np.array([[c[i], s[i]], [-s[i], c[i]]], dtype="complex")
-			H[:i+2, i:i+2] @= g
+		for i in range(m-1):
+			g = np.array([[c[i], -s[i]*np.conj(t[i])],
+						[s[i]*t[i], c[i]]], dtype="complex")
+			H[:i+2, i:i+2] = mult(H[:i+2, i:i+2], g)
 
-			Q[:, i:i+2] @= g
-
-		H[...] = np.matrix.round(H, decimals=12)
-		Q[...] = np.matrix.round(Q, decimals=12)
+			Q[:, i:i+2] = mult(Q[:, i:i+2], g)
 	
-	# ! A modifier
 	def step_qr_shift(self, H, Q, m):
+		def wilkinson_shift(B):
+			a = B[0, 0]; b = B[0, 1]; c = B[1, 0]; d = B[1, 1]
+			aplusd = a+d
+			sqrt_rho = np.sqrt((aplusd)**2 + 4*(b*c - a*d))
+			l1 = (aplusd-sqrt_rho)/2; l2 = (aplusd+sqrt_rho)/2
+			return l1 if np.abs(l1-d) < np.abs(l2-d) else l2
+		
+		shift = wilkinson_shift(H[m-2:m, m-2:m])
+
+		for i in range(m):
+			H[i, i] -= shift
 		self.step_qr(H, Q, m)
+		for i in range(m):
+			H[i, i] += shift
+
+		if np.abs(H[m-1, m-2]) < 1e-12:
+			return m-1
+		
 		return m
 
+
+def mult(A, B):
+	m, n = np.shape(A)
+	n2, p = np.shape(B)
+
+	assert n == n2
+
+	C = np.zeros((m, p), dtype="complex")
+
+	for i in range(m):
+		for j in range(p):
+			for k in range(n):
+				C[i, j] += A[i, k]*B[k, j]
+
+	return C
+
+
+def mult_vec(a, b):
+	m, n = np.shape(a)[0], np.shape(b)[0]
+	assert n == m
+
+	sum = 0
+
+	for i in range(n):
+		sum += a[i]*b[i]
+
+	return sum
+
+
+def sign(x, eps=1e-12):
+	norm = np.abs(x)
+	if norm > eps:
+		return x/norm
+	
+	return 1
+
+def to_matrix(a):
+	n = np.shape(a)[-1]
+	ret = np.empty((1, n), dtype="complex")
+
+	for i in range(n):
+		ret[0, i] = a[i]
+
+	return ret
 
 if __name__ == "__main__":
 	
