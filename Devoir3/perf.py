@@ -36,12 +36,12 @@ def plot_complexity(min, max, num, eps, max_iter):
 		iter_num[i] = k
 		iter_num_shift[i] = k2
 
-		print("iteration %d/%d (size %d) done !" % (i, num, n))
+		print("iteration %d/%d (size %d) done !" % (i+1, num, n))
 
 
 	plt.figure()
 
-	plt.title("Complexity analysis of the QR Algorithm")
+	plt.title("Complexity analysis of the QR Algorithm (max_iter = %d)"%max_iter)
 
 	plt.xlabel("matrix size")
 	plt.ylabel("execution time [s]")
@@ -57,8 +57,8 @@ def plot_complexity(min, max, num, eps, max_iter):
 	plt.legend(["QR Algorithm (no shifts)", "QR Algorithm", "scipy.linalg.schur",
 				"$\mathcal{O}(m^3)$"])
 
-	plt.show()
-	# plt.savefig("rapport/images/complcomp.svg", format="svg")
+	# plt.show()
+	plt.savefig("rapport/images/complexity%d.svg"%max_iter, format="svg")
 
 	plt.figure()
 
@@ -69,19 +69,20 @@ def plot_complexity(min, max, num, eps, max_iter):
 
 	plt.semilogx(size, iter_num)
 	plt.semilogx(size, iter_num_shift)
-	plt.semilogx(size, np.ones(num)*max_iter, linestyle="dashed")
+	plt.semilogx(size, np.ones(num)*max_iter, linestyle="dashed", c="r")
 
 	plt.grid(which="major", linestyle="-")
 	plt.grid(which="minor", linestyle=":")
 
-	plt.legend(["No shift", "With shift", "Max iteration allowed"])
+	plt.legend(["No shift", "With shift", "Max iterations allowed"])
 
-	plt.show()
-	# plt.savefig("rapport/images/complratio.svg", format="svg")
+	# plt.show()
+	plt.savefig("rapport/images/itercount%d.svg"%max_iter, format="svg")
 
 
 if __name__ == "__main__":
 	# pour compiler
 	solve_qr(np.array([[2, 1, 1], [1, 2, 1], [1, 1, 2]], dtype="complex"), True, 1e-12, 10)
 
-	plot_complexity(10, 1000, 5, 1e-12, 1000)
+	plot_complexity(10, 1000, 20, 1e-12, 1000)
+	plot_complexity(10, 1000, 20, 1e-12, 5000)
