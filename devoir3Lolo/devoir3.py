@@ -3,60 +3,66 @@ import numba as nb
 import scipy.linalg as sp
 import matplotlib.pyplot as plt
 
-#@nb.jit()
+@nb.jit()
 def conj(A) :
     return A.conjugate().T
 
+@nb.jit()
 def givens(xi,xj):
     if xi != 0 or xj != 0:
+        ang = np.angle(xj) - np.angle(xi)
         c = abs(xi) / (abs(xi)**2 + abs(xj)**2)**0.5
-        s = abs(xj) / (abs(xi)**2 + abs(xj)**2)**0.5
+        s = (abs(xj) / (abs(xi)**2 + abs(xj)**2)**0.5)
     else : 
         c = 1
         s = 0
-    return c, s
+    return np.array([[c,s * np.exp(-1j*ang)],[-s * np.exp(1j*ang),c]])
 
+@nb.jit()
 def mult(A,B) :
     if A.shape[1] != B.shape[0] :
         raise ValueError("Matrix dimensions do not match")
-    C = np.ndarray((A.shape[0],B.shape[1]),dtype=complex)
-    for i in range(A.shape[0]) :
-        for j in range(B.shape[1]) :
+    C = np.empty((A.shape[0],B.shape[1]),dtype=np.complex128)
+    for i in nb.prange(A.shape[0]) :
+        for j in nb.prange(B.shape[1]) :
             sum = 0
-            for k in range(A.shape[1]) :
+            for k in nb.prange(A.shape[1]) :
                 sum += A[i,k] * B[k,j]
             C[i,j] = sum
     return C
     
-
+@nb.jit() 
 def norm(v) :
-    return np.sqrt((v.conjugate().T @ v))
+    return (conj(v) @ v)**0.5
 
-
+@nb.jit()
 def sign(x) :
-    return x/np.abs(x)
+    return x/abs(x)
 
+@nb.jit()
 def hessenberg(A,P) :
     n = A.shape[0]
     for i in range(len(P)):
         P[i,:] = [1.0 + 0.0j if k == i else 0 for k in range(len(P))]
-    U = np.ndarray((len(A),len(A)),dtype=np.complex128)
+    U = np.empty((len(A),len(A)),dtype=np.complex128)
     for k in range(n-2) :
         x = A[k+1:,k].copy()
-        x[0] = x[0] + sign(x[0]) * sp.norm(x)
-        if sp.norm(x) > 1e-13 :
-            x /= sp.norm(x)
+        rho = -sign(x[0])
+        x[0] = x[0] -rho * norm(x)
+        nor = norm(x)
+        if abs(nor) > 1e-15 :
+            x = x/abs(nor)
         x = np.reshape(x,(len(x),1))
-        x_star = x.conjugate().T
+        x_star = conj(x)
         U[k+1:,k] = x[:,0].copy()
-        A[k+1:,k:] -= 2*x @ x_star @ A[k+1:, k:]
-        A[:,k+1:] -= 2*(A[:,k+1:] @ x )@ x_star
+        A[k+1:,k:] = A[k+1:,k:] - 2*mult(x, mult(x_star, A[k+1:, k:]))
+        A[:,k+1:] -= 2*mult(mult(A[:,k+1:],x ), x_star)
     for k in range(n-3,-1,-1):
         v = U[k+1:,k].copy()
         v = np.reshape(v,(len(v),1))
-        P[k+1:,k+1:] = P[k+1:,k+1:] - 2 * v @ (v.conjugate().T @ P[k+1:,k+1:])
-    A[:] = np.where(np.abs(A) < 1e-13, 0, A)
-    P[:] = np.where(np.abs(P) < 1e-13, 0, P)
+        P[k+1:,k+1:] = P[k+1:,k+1:] - 2 * mult(v ,mult(conj(v), P[k+1:,k+1:]))
+    A[:] = np.where(np.abs(A) < 1e-15, 0, A)
+    P[:] = np.where(np.abs(P) < 1e-15, 0, P)
     return 
     
 
@@ -71,15 +77,20 @@ unitaire — H = U ∗ AU
 • m est la dimension de la matrice active
 • En sortie, le tableau H a été réécrit par RQ où le produit QR est une décomposition qr de H. U
 est également mis à jour."""
-    c = np.zeros(m+1,dtype=complex)
-    s = np.zeros(m+1,dtype=complex)
+    A = H.copy()
+    dict = {}
     for k in range(m-1):
-        c[k], s[k] = givens(H[k,k], H[k+1,k])
-        H[k:k+2, k:] = np.array([[c[k], -s[k]], [s[k], c[k]]]) @ H[k:k+2, k:]
-        U[:,k:k+2] = U[:,k:k+2] @ np.array([[c[k], s[k]], [-s[k], c[k]]])
+        g = givens(H[k,k], H[k+1,k])
+        dict[k] = g.copy()
+        gs = conj(g)
+        H[k:k+2, k:] = gs @ H[k:k+2, k:]
+        
     
     for k in range(m-1):
-        H[:k+2,k:k+2] = H[:k+2,k:k+2] @ np.array([[c[k], s[k]], [-s[k], c[k]]])
+        g = dict[k]
+        H[:k+2,k:k+2] = H[:k+2,k:k+2] @ g
+        U[:,k:k+2] = U[:,k:k+2] @ g
+    
     
 
 #@nb.jit()
@@ -92,7 +103,9 @@ On vous demande d’écrire une fonction Python m_new = step_qr_shift(H, Q, m) o
 • H, Q et m sont définis comme ci-dessus
 • m_new est la dimension active après avoir effectué l’itération
 • En sortie, les tableaux H et Q sont mis à jours comme ci-dessus"""
+    H[:] = [H[i,j] if i != j else H[i,j] - m for i in range(len(H)) for j in range(len(H))]
     step_qr(H,Q,m)
+    H[:] = [H[i,j] if i != j else H[i,j] + m for i in range(len(H)) for j in range(len(H))]
     d = (H[m-2,m-2] - H[m-1,m-1]) / 2
     m_new = H[m-1,m-1] - np.sign(d) * (H[m-1,m-2]**2) / (np.abs(d) + (d**2 + H[m-1,m-2]**2)**0.5)
     return m_new
@@ -126,9 +139,7 @@ atteint max_iter itérations"""
         else :
             step_qr(H,U,m)
             
-        diff = conj(U) @ A @ U - H
-        diff = np.where(np.abs(diff) < 1e-13, 0, diff)
-        if np.linalg.norm(np.diag(H,-1)) < eps and np.linalg.norm(diff) < eps:
+        if np.linalg.norm(np.diag(H,-1)) < eps :
             return U,k
     A = H
     if k == max_iter :
@@ -137,15 +148,14 @@ atteint max_iter itérations"""
     return U,k
 
 
-n = 40
-A = np.ndarray((n,n),dtype=complex)
-P = np.ndarray((n,n),dtype=complex)
+n = 20
+A = np.empty((n,n),dtype=np.complex128)
+P = np.empty((n,n),dtype=np.complex128)
 
-A = np.random.rand(n,n) #+ 1j * np.random.rand(n,n)
+A = np.random.rand(n,n) + 1j * np.random.rand(n,n)
 A2 = A.copy()
 A3 = A.copy()
-U,k = solve_qr(A,False,1e-15,10000)
+U,k = solve_qr(A,False,1e-8,10000)
 print(k)
-print(U @ A @ conj(U) - A2)
-plt.spy(U @ A @ conj(U) - A2)
-plt.show()
+print(np.allclose(U @ A @ conj(U),np.diag(np.diag(U @ A @ conj(U)))))
+print(np.linalg.norm(U @ A @ conj(U) - A2))
