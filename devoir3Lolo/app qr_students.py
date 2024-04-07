@@ -479,29 +479,140 @@ class WindowQR(QMainWindow):
                 break
         return
     
-    # ! A modifier
-    def hessenberg(self, A, Q):
-        n = A.shape[0]
-        self.labels[2].setText("Optional label")
-        self.set_delay(DELAY_MID)
-        for i in range(n):
-            for j in range(n):
-                self.set_matrix(A, i, j, A[i, j])
-        Q[0, 0] = 1.0
-        return
+    def conj(self,A) :
+        return np.transpose(A.conjugate())
+
+    def mult(self,A,B) :
+        if A.shape[1] != B.shape[0] :
+            raise ValueError("Dimensions non compatibles")
+        C = np.zeros((A.shape[0],B.shape[1]),dtype=np.complex128)
+        for i in range(A.shape[0]) :
+            for j in range(B.shape[1]) :
+                for k in range(A.shape[1]) :
+                    self.set_matrix(C,i,j,C[i,j] + A[i,k] * B[k,j])
+
+        return C
+
+    def norm(self,v) :
+        sum = 0
+        for i in range(len(v)) :
+            sum += np.abs(v[i])**2
+        return np.sqrt(sum)
+
+    def sign(self,x) :
+        if np.abs(x) < 1e-15:
+            return 1
+        return x/np.abs(x)
+
+    def givens(self,xi,xj):
+        if xi != 0 or xj != 0:
+            ang = np.angle(xj) - np.angle(xi)
+            c = abs(xi) / np.hypot(abs(xi),abs(xj))
+            s = abs(xj) / np.hypot(abs(xi),abs(xj))
+            return np.array([[c,-s * np.exp(-1j*ang)],
+                            [s * np.exp(1j*ang),c]])
+        else : 
+            return np.identity(2,dtype=np.complex128)
 
     # ! A modifier
-    def step_qr(self, H, Q, m):  
-        n = H.shape[0]
-        tmp = np.copy(np.diag(H))
+    def hessenberg(self, A, P):
+        n = A.shape[0]
         for i in range(n):
-            self.set_matrix(H, i, i, 0.95*tmp[i] + 0.05*tmp[i-2].imag + 0.05*1j*tmp[i-1].real)
+            for j in range(n):
+                self.set_matrix(P,i,j,0.0 + 0.0j)
+            self.set_matrix(P,i,i,1.0 + 0.0j)    
+        U = np.empty((len(A),len(A)),dtype=np.complex128)
+        for k in range(n-2) :
+            x = np.empty(n-k-1,dtype=np.complex128)
+            x[:] = A[k+1:,k]
+            x[0] += self.sign(x[0])  * self.norm(x)
+            nor = self.norm(x)
+            if np.abs(nor) > 1e-15 :
+                x /= np.abs(nor)
+            x = x[:, np.newaxis]
+            x_star = self.conj(x)
+            #U[k+1:,k] = x[:,0]
+            #Code the line above using set_matrix, considering the fact that set_matrix only sets one element at a time
+            for i in range(k+1,n):
+                self.set_matrix(U,i,k,x[i-k-1,0])
+
+            #A[k+1:,k:] -= 2*self.mult(x, self.mult(x_star, A[k+1:, k:]))
+            new = self.mult(x, self.mult(x_star, A[k+1:, k:]))
+            for i in range(k+1,n):
+                for j in range(k,n):
+                    self.set_matrix(A,i,j,A[i,j] - 2*new[i-k-1,j-k])
+            #A[:,k+1:] -= 2*self.mult(self.mult(A[:,k+1:],x ), x_star)
+            new = self.mult(self.mult(A[:,k+1:],x ), x_star)
+            for i in range(n):
+                for j in range(k+1,n):
+                   
+                    self.set_matrix(A,i,j,A[i,j] - 2*new[i,j-k-1])
+                    
+        for k in range(n-3,-1,-1):
+            v = np.empty((n-k-1,1),dtype=np.complex128)
+            for i in range(k+1,n):
+                self.set_matrix(v,i-k-1,0,U[i,k])
+            #P[k+1:,k+1:] -= 2 * self.mult(v ,self.mult(self.conj(v), P[k+1:,k+1:]))
+            new = self.mult(v ,self.mult(self.conj(v), P[k+1:,k+1:]))
+            for i in range(k+1,n):
+                for j in range(k+1,n):
+                    self.set_matrix(P,i,j,P[i,j] - 2*new[i-k-1,j-k-1])
+        return 
+    # ! A modifier
+    def step_qr(self, H, U, m):  
+        list = {}
+        for k in range(m-1):
+            g = self.givens(H[k,k], H[k+1,k])
+            list[k] = g
+            gs = self.conj(g)
+            #H[k:k+2, k:] = self.mult(gs,H[k:k+2, k:])
+            #Code the line above using set_matrix, considering the fact that set_matrix only sets one element at a time
+            new = self.mult(gs,H[k:k+2, k:])
+            for i in range(k,k+2):
+                for j in range(k,m):
+                    self.set_matrix(H,i,j,new[i-k,j-k])
+            
+        
+        for k in range(m-1):
+            g = list[k]
+            #H[:k+2,k:k+2] = self.mult(H[:k+2,k:k+2],g)
+            #Code the line above using set_matrix, considering the fact that set_matrix only sets one element at a time
+            new = self.mult(H[:k+2,k:k+2],g)
+            for i in range(k+2):
+                for j in range(k,k+2):
+                    self.set_matrix(H,i,j,new[i,j-k])
+            #U[:,k:k+2] = self.mult(U[:,k:k+2],g)
+            new = self.mult(U[:,k:k+2],g)
+            for i in range(m):
+                for j in range(k,k+2):
+                    self.set_matrix(U,i,j,new[i,j-k])
         return
     
+    def shift(self,A):
+        h1 = A[0,0]
+        h2 = A[0,1]
+        h3 = A[1,0]
+        h4 = A[1,1]
+        l1 = ((h1 + h4) + ((h1+h4)**2 - 4*(h1*h4 - h2*h3))**0.5) / 2
+        l2 = ((h1 + h4) - ((h1+h4)**2 - 4*(h1*h4 - h2*h3))**0.5) / 2
+        if abs(l1 - h4) < np.abs(l2 - h4):
+            return l1
+        else:
+            return l2
+
     # ! A modifier
-    def step_qr_shift(self, H, Q, m):
-        self.step_qr(H, Q, m)
+    def step_qr_shift(self, H, Q, m, eps=1e-15):
+        mu = self.shift(H[m-2:m,m-2:m])
+        for i in range(m):
+            self.set_matrix(H,i,i,H[i,i] - mu)
+        self.step_qr(H,Q,m)
+        for i in range(m):
+            self.set_matrix(H,i,i,H[i,i] + mu)
+        if abs(H[m-1,m-2]) < eps:
+            return m-1
+        
         return m
+
 
 
 if __name__ == "__main__":
