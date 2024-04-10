@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from time import perf_counter
 
-from devoir3 import solve_qr
+from devoir3 import solve_qr, step_qr, step_qr_shift, hessenberg
 
 def plot_complexity(min, max, num, eps, max_iter):
 	size = np.logspace(np.log10(min), np.log10(max), num)
@@ -80,9 +80,55 @@ def plot_complexity(min, max, num, eps, max_iter):
 	plt.savefig("rapport/images/itercount%d.svg"%max_iter, format="svg")
 
 
+def test_convergence(n, iter_num):
+	A = np.asarray(np.random.rand(n, n) * 100, dtype="complex") +\
+		np.asarray(np.random.rand(n, n) * 100, dtype="complex")*1j
+	B = A.copy()
+	C = A.copy()
+	Q = A.copy()
+	Q2 = A.copy()
+
+	ratio = np.empty(iter_num)
+	ratio_noshift = np.empty(iter_num)
+
+	solve_qr(B, True, 1e-12, 1000)
+	hessenberg(A, Q)
+	hessenberg(C, Q2)
+	m = n
+	for i in range(iter_num):
+		m = step_qr_shift(A, Q, m, 1e-12)
+		step_qr(C, Q2, n)
+
+
+		ratio[i] = np.linalg.norm(np.sort(np.diag(A))-np.sort(np.diag(B)))
+		ratio_noshift[i] = np.linalg.norm(np.sort(np.diag(C))-np.sort(np.diag(B)))
+
+	plt.figure()
+
+	plt.title("Diagonal error")
+
+	plt.xlabel("Iteration")
+	plt.ylabel("$|\lambda_k - \lambda|$")
+
+	abscisses = np.arange(0, iter_num, 1)
+
+	plt.semilogy(abscisses, ratio)
+	plt.semilogy(abscisses, ratio_noshift)
+
+	plt.legend(["with shift", "no shift"])
+
+	plt.grid(which="major", linestyle="-")
+	plt.grid(which="minor", linestyle=":")
+
+	plt.show()
+	# plt.savefig("rapport/images/convergence%d.svg"%iter_num, format="svg")
+
+
 if __name__ == "__main__":
 	# pour compiler
 	solve_qr(np.array([[2, 1, 1], [1, 2, 1], [1, 1, 2]], dtype="complex"), True, 1e-12, 10)
 
-	plot_complexity(10, 1000, 20, 1e-12, 1000)
-	plot_complexity(10, 1000, 20, 1e-12, 5000)
+	# plot_complexity(10, 1000, 20, 1e-12, 1000)
+	# plot_complexity(10, 1000, 20, 1e-12, 5000)
+ 
+	test_convergence(3, 50)
