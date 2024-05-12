@@ -1,0 +1,69 @@
+<svg width="596.0" height="340" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="arrow-gray" markerWidth="10" markerHeight="10" refX="9" refY="3"
+                orient="auto" >
+<path d="M0,0 L0,6 L9,3 z" fill="gray"/></marker></defs>
+<path stroke-width="1" stroke="gray" d="M 302 260 60 303" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 27 233 357 88" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 27 233 292 24" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 27 233 20 174" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 27 233 59 256" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 27 233 51 314" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 354 114 415 173" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 354 114 361 92" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 64 259 296 260" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 64 259 55 298" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 64 259 32 236" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 64 259 54 314" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 64 259 158 218" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 53 320 296 261" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 53 320 258 266" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 53 320 54 310" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 53 320 63 265" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 53 320 159 220" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 164 216 258 262" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 164 216 59 300" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 164 216 358 89" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 164 216 26 170" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 27 233 258 265" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 27 233 296 260" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 20 168 158 214" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 20 168 52 314" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 302 260 70 259" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 264 265 60 303" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 264 265 170 219" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 420 177 359 118" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 54 304 296 261" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 54 304 258 266" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 54 304 21 174" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 54 304 53 314" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 54 304 159 220" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 363 86 417 172" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 381 187 350 260" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 363 86 301 24" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 297 20 416 172" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 297 20 359 82" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 297 20 32 229" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 297 20 351 108" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 348 266 308 260" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 348 266 379 193" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 20 168 258 263" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 20 168 414 177" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 20 168 53 298" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 20 168 27 227" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 363 86 356 108" marker-end="url(#arrow-gray)"/>
+<path stroke-width="1" stroke="gray" d="M 381 187 33 233" marker-end="url(#arrow-gray)"/>
+<circle cx="302" cy="260" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="264" cy="265" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="420" cy="177" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="54" cy="304" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="363" cy="86" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="297" cy="20" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="348" cy="266" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="20" cy="168" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="27" cy="233" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="354" cy="114" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="64" cy="259" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="53" cy="320" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="164" cy="216" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<circle cx="381" cy="187" r="7.0" style="fill:gray;stroke:black;stroke-width:1.0"/>
+<text text-anchor="start" x="312" y="260" font-size="12">Pablo Picasso</text><text text-anchor="start" x="274" y="265" font-size="12">Claude Monet</text><text text-anchor="start" x="430" y="177" font-size="12">Michel Angelo</text><text text-anchor="start" x="64" y="304" font-size="12">Edouard Manet</text><text text-anchor="start" x="373" y="86" font-size="12">Peter Paul Rubens</text><text text-anchor="start" x="307" y="20" font-size="12">Rembrandt</text><text text-anchor="start" x="358" y="266" font-size="12">Gustav Klimt</text><text text-anchor="start" x="30" y="168" font-size="12">Edgar Degas</text><text text-anchor="start" x="37" y="233" font-size="12">Vincent van Gogh</text><text text-anchor="start" x="364" y="114" font-size="12">Leonardo da Vinci</text><text text-anchor="start" x="74" y="259" font-size="12">Henri Matisse</text><text text-anchor="start" x="63" y="320" font-size="12">Paul Cezanne</text><text text-anchor="start" x="174" y="216" font-size="12">Pierre-Auguste Renoir</text><text text-anchor="start" x="391" y="187" font-size="12">Egon Schiele</text></svg>
