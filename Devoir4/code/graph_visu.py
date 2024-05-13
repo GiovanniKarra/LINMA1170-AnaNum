@@ -2,7 +2,7 @@ import networkx as nx
 import plotly.graph_objects as go
 
 
-def plot_graph(G: nx.Graph):
+def plot_graph_plotly(G: nx.Graph):
 	edge_x = []
 	edge_y = []
 	for edge in G.edges():
