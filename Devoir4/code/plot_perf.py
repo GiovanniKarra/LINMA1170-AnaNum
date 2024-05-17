@@ -10,9 +10,12 @@ def plot_compress_perf(filepath, compression_min, compression_max, N, title=""):
 	levels = np.logspace(np.log10(compression_min), np.log10(compression_max), N)
 	sizes = np.empty(N)
 
-	inital_size = path.getsize(filepath)
-
 	matrix = image_to_matrix(filepath)
+
+	image = Image.fromarray(matrix, "RGB")
+	image.save("temp.jpg")
+
+	inital_size = path.getsize("temp.jpg")
 
 	for i, level in enumerate(levels):
 		compress_image(matrix, "temp.jpg", level)
@@ -42,9 +45,9 @@ def plot_compress_perf(filepath, compression_min, compression_max, N, title=""):
 if __name__ == "__main__":
 	plot_compress_perf("images/Jean-Francois_Remacle.jpg", 1, 1000, 30, title="Jean-François Remacle")
 
-	# A = np.asarray(np.random.rand(1000, 1000, 3)*255, dtype=np.uint8)
-	# print(A)
-	# image = Image.fromarray(A, "RGB")
-	# image.save("images/random.jpg")
+	A = np.asarray(np.random.rand(1000, 1000, 3)*255, dtype=np.uint8)
+	print(A)
+	image = Image.fromarray(A, "RGB")
+	image.save("images/random.jpg")
 
 	# plot_compress_perf("images/random.jpg", 1, 1000, 30, title="Random Image")
