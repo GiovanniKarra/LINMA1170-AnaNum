@@ -11,7 +11,7 @@
 \usepackage{float}
 \usepackage{hyperref}
 
-\title{LINMA1170 - Devoir 4\\Détection de communautés à l'aide de la SVD}
+\title{LINMA1170 - Devoir 4\\Compression d'images à l'aide de la SVD}
 \author{Giovanni Karra - 45032100\\Pierre Leboutte - 43302100}
 
 \begin{document}
@@ -23,7 +23,7 @@ Dans le cadre de ce projet, nous allons expliquer ce qu'est la décomposition SV
 \section*{SVD, kesako?}
 
 \subsection*{Quelques concepts}
-Pour comprendre la décompostion SVD, il est essentiel de connaitre certains concepts clé de l'algèbre linéaire.\\
+Pour comprendre la décompostion SVD, il est essentiel de connaitre certains concepts clé de l'algèbre linéaire.
 \begin{itemize}
 	\item Soit une matrice $A$, sa $matrice ~conjugu$é$e$ $A^*$ est équivalente à la la matrice $A^T$ dont on conjugue les entrées complexes. 
 	\item Une matrice $A$ est dite $unitaire$ ssi $AA^* = I$.
@@ -35,7 +35,8 @@ Pour comprendre la décompostion SVD, il est essentiel de connaitre certains con
 Commençons par observer que l'image d'une hypersphère de dimension $n$ par une matrice $m \times n$ quelconque est une hyperellipse en dimension $m$.\\
 Soit $A$ une matrice $m \times n$, soit $\{\sigma_iu_i\}$ les semi-axes de cette hyperellipse, soit $\{v_i\}$ les points de l'hypersphère (orthogonaux entre eux) dont l'image par $A$ vaut les semi-axes, autrement dit $Av_i = \sigma_iu_i ~~ \forall i = 1...min(m, n)$.\\
 \begin{center}
-	\includegraphics*[scale=0.3]{images/Hyperplot.png}
+    \includegraphics[scale=0.3]{images/Hyperplot.png}\\
+    \caption{Fig 1. Représentation sous forme d'hyperellipses}
 \end{center}
 En écrivant cette égalité sous forme matricielle, nous obtenons:
 \begin{align*}
@@ -89,6 +90,45 @@ Pour ce faire, nous divisons la grande matrice tridimensionnelle en trois matric
 Pour finir, on superpose les trois matrices réduites, et on les sauvegarde dans un fichier image du même format que le fichier d'entrée, réduisant ainsi la taille en gardant la même résolution. Il est clair que plus $k$ est grand, plus l'image est comprimée.
 
 \subsection*{Résultats}
-Regardez à quel point notre algo est bon/merdique.
+\begin{figure}
+    \centering
+    \hspace*{-3cm}
+    \includegraphics[width=1.3\textwidth]{images/compression_example.pdf}
+    Fig 2. Compression de Jean-François Remacle avec différents niveaux de compression
+    \label{fig:example}
+\end{figure}
+Quoi de mieux de tester notre algorithme qu'avec notre propre Lena: notre cher professeur Jean-François Remacle.\\
+Nous pouvons constater que plus le niveau de compression\footnote{Ici, "niveau de compression" désigne le diviseur du nombre de valeurs singulières. Par exemple, si le niveau est de 2, alors le nombre de valeurs singulères (et donc le rang) est divisé par 2} est élevé, plus l'image est dégradée. Notons cependant qu'un niveau raisonnable de compression (e.g 50) conserve une qualité tout à fait raisonnable
+\\\\
+Nous pouvons observer que le ratio de taille sur une image aléatoire  ou choisie diminue fortement avec le niveau de compression. Il y a donc un compromis à trouver entre la conservation de la qualité et la compression. Un niveau de compression autour de 60-70 semble être un bon équilibre. À ce niveau, la taille d'une image est réduite de 10\% en conservant une qualité d'image tout à fait raisonnable.
+
+\begin{minipage}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=1\textwidth]{images/Jean-Francois_Remacle_plot.pdf}
+    \\
+    \caption{Fig 3. Efficacité de compression sur une image choisie}
+\end{minipage}
+\begin{minipage}[b]{0.49\textwidth}
+    \includegraphics[width=1\textwidth]{images/Random_Image_plot.pdf}
+    \\
+    \caption{Fig 4. Efficacité de compression sur une image aléatoire}
+\end{minipage}
+
+\section*{Conclusion}
+La SVD est une méthode élégante et générique qui trouve une application particulièrement à-propos dans le contexte de la compression d'image. 
+Nous avons appliqué cette méthode sur les matrices R/G/B représentant les composantes couleur d'une image.
+Pour de futurs travaux, il pourrait être intéressant d'envisager une parallélisation du traitement sur les trois canaux de couleur.
+
+\begin{thebibliography}{9}
+\bibitem{trefethen} L. N. Trefethen and D. Bau III, Numerical Linear Algebra. Philadelphia, PA: SIAM, 1997.
+
+\end{thebibliography}
+
+\section*{Annexes}
+Nous avons réalisé une petite vidéo montrant Jean-François Remacle se faire progressivement comprimer.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.1]{images/QR.png}
+\end{figure}
 
 \end{document}
