@@ -25,4 +25,4 @@ def compress_image(image_matrix, filename, compression_level):
 
 	image = Image.fromarray(compressed_matrix, "RGB")
 	image.save(filename)
-	image.show()
+	#image.show()
