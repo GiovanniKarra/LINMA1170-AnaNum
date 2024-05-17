@@ -3,7 +3,7 @@ from numpy.linalg import svd
 from PIL import Image
 
 
-def compress_image(image_matrix, filename, compression_level):
+def compress_image(image_matrix, output_path, compression_level):
 
 	m, n, _ = image_matrix.shape
 	k = int(min(m, n)/compression_level)
@@ -24,5 +24,11 @@ def compress_image(image_matrix, filename, compression_level):
 	compressed_matrix = np.stack([R, G, B], axis=2, dtype=np.int8, casting="unsafe")
 
 	image = Image.fromarray(compressed_matrix, "RGB")
-	image.save(filename)
-	image.show()
+	image.save(output_path)
+	# image.show()
+
+
+def image_to_matrix(filepath):
+	image = Image.open(filepath)
+
+	return np.asarray(image)

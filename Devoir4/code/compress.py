@@ -1,9 +1,6 @@
-import numpy as np
-from numpy.linalg import svd
-from PIL import Image
 import argparse
 
-from image_svd import compress_image
+from image_svd import compress_image, image_to_matrix
 
 
 if __name__ == "__main__":
@@ -24,8 +21,6 @@ if __name__ == "__main__":
 		if args.output is not None\
 			else filename+"compressed.jpg"
 
-	image = Image.open(filename)
-
-	image_matrix = np.asarray(image)
+	image_matrix = image_to_matrix(filename)
 
 	compress_image(image_matrix, output, compression_level)
