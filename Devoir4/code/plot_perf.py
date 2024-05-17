@@ -40,11 +40,11 @@ def plot_compress_perf(filepath, compression_min, compression_max, N, title=""):
 
 
 if __name__ == "__main__":
-	# plot_compress_perf("images/Jean-Francois_Remacle.jpg", 1, 1000, 30, title="Jean-François Remacle")
+	plot_compress_perf("images/Jean-Francois_Remacle.jpg", 1, 1000, 30, title="Jean-François Remacle")
 
-	A = np.asarray(np.random.rand(1000, 1000, 3)*255, dtype=np.uint8)
-	print(A)
-	image = Image.fromarray(A, "RGB")
-	image.save("images/random.jpg")
+	# A = np.asarray(np.random.rand(1000, 1000, 3)*255, dtype=np.uint8)
+	# print(A)
+	# image = Image.fromarray(A, "RGB")
+	# image.save("images/random.jpg")
 
-	plot_compress_perf("images/random.jpg", 1, 1000, 30, title="Random Image")
+	# plot_compress_perf("images/random.jpg", 1, 1000, 30, title="Random Image")
