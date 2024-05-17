@@ -1,5 +1,5 @@
 #take an image remacle.png as input and show its compression with different factors
-
+#Pierre Leboutte et Giovanni Karra
 import numpy as np
 from numpy.linalg import svd
 from PIL import Image
