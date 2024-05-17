@@ -14,15 +14,12 @@ def compress_image(image_matrix, filename, compression_level):
 
 	U, S, VT = svd(R, full_matrices=False)
 	R = (U[:, :k] * S[:k]) @ VT[:k, :]
-	# R = np.sum([S[i]*(np.array([U[:, i]]).T @ np.array([VT[i, :]])) for i in range(k)])
 
 	U, S, VT = svd(G, full_matrices=False)
 	G = (U[:, :k] * S[:k]) @ VT[:k, :]
-	# G = np.sum([S[i]*(np.array([U[:, i]]).T @ np.array([VT[i, :]])) for i in range(k)])
 
 	U, S, VT = svd(B, full_matrices=False)
 	B = (U[:, :k] * S[:k]) @ VT[:k, :]
-	# B = np.sum([S[i]*(np.array([U[:, i]]).T @ np.array([VT[i, :]])) for i in range(k)])
 
 	compressed_matrix = np.stack([R, G, B], axis=2, dtype=np.int8, casting="unsafe")
 
