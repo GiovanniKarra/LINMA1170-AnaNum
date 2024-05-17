@@ -19,16 +19,7 @@ def compress_and_display(filename, compression_level):
     plt.figure()
     
     image_matrix = np.asarray(image)
-    #print("Image originale:")
-    #image.show()
     print("hey")
-    #for level in compression_level:
-    #    compressed_filename = os.path.splitext(filename)[0] + f"_compressed_{level}.jpg"
-    #    compress_image(image_matrix, compressed_filename, level)
-    #    compressed_image = Image.open(compressed_filename)
-    #    compressed_image.show()
-    
-    #show multiple images in a single squared figure, row and column
     fig, axes = plt.subplots(1, len(compression_level), figsize=(18, 6))
     for i, level in enumerate(compression_level):
         compressed_filename = os.path.splitext(filename)[0] + f"_compressed_{level}.jpg"
@@ -40,7 +31,7 @@ def compress_and_display(filename, compression_level):
     fig.suptitle("Compression de Jean-François Remacle avec différents niveaux")
     plt.savefig("images/compression_example.pdf")
     plt.tight_layout()
-    plt.show()
+    #plt.show()
 
 compress_and_display("images/Jean-Francois_Remacle.jpg", [1, 50, 100, 300, 500])
 
